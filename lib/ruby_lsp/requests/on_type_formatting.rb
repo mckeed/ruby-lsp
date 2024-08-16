@@ -21,9 +21,10 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(Interface::DocumentOnTypeFormattingOptions) }
+        sig { returns(Interface::DocumentOnTypeFormattingRegistrationOptions) }
         def provider
-          Interface::DocumentOnTypeFormattingOptions.new(
+          Interface::DocumentOnTypeFormattingRegistrationOptions.new(
+            document_selector: [Interface::DocumentFilter.new(language: "ruby")],
             first_trigger_character: "{",
             more_trigger_character: ["\n", "|", "d"],
           )
@@ -41,7 +42,7 @@ module RubyLsp
 
       sig do
         params(
-          document: Document,
+          document: RubyDocument,
           position: T::Hash[Symbol, T.untyped],
           trigger_character: String,
           client_name: String,

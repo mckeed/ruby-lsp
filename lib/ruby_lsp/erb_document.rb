@@ -4,15 +4,19 @@
 module RubyLsp
   class ERBDocument < Document
     extend T::Sig
+    extend T::Generic
 
-    sig { override.returns(Prism::ParseResult) }
+    ParseResultType = type_member { { fixed: Prism::ParseResult } }
+
+    sig { override.returns(ParseResultType) }
     def parse
       return @parse_result unless @needs_parsing
 
       @needs_parsing = false
       scanner = ERBScanner.new(@source)
       scanner.scan
-      @parse_result = Prism.parse(scanner.ruby)
+      # assigning empty scopes to turn Prism into eval mode
+      @parse_result = Prism.parse(scanner.ruby, scopes: [[]])
     end
 
     sig { override.returns(T::Boolean) }
@@ -23,6 +27,16 @@ module RubyLsp
     sig { override.returns(LanguageId) }
     def language_id
       LanguageId::ERB
+    end
+
+    sig do
+      params(
+        position: T::Hash[Symbol, T.untyped],
+        node_types: T::Array[T.class_of(Prism::Node)],
+      ).returns(NodeContext)
+    end
+    def locate_node(position, node_types: [])
+      RubyDocument.locate(@parse_result.value, create_scanner.find_char_position(position), node_types: node_types)
     end
 
     class ERBScanner

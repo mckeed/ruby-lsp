@@ -601,32 +601,32 @@ class RubyDocumentTest < Minitest::Test
       version: 1,
       uri: URI("file:///foo/bar.rb"),
     )
-    assert_equal(RubyLsp::Document::SorbetLevel::None, document.sorbet_level)
+    assert_equal(RubyLsp::RubyDocument::SorbetLevel::None, document.sorbet_level)
   end
 
   def test_sigil_ignore
     document = RubyLsp::RubyDocument.new(source: +"# typed: ignore", version: 1, uri: URI("file:///foo/bar.rb"))
-    assert_equal(RubyLsp::Document::SorbetLevel::Ignore, document.sorbet_level)
+    assert_equal(RubyLsp::RubyDocument::SorbetLevel::Ignore, document.sorbet_level)
   end
 
   def test_sigil_false
     document = RubyLsp::RubyDocument.new(source: +"# typed: false", version: 1, uri: URI("file:///foo/bar.rb"))
-    assert_equal(RubyLsp::Document::SorbetLevel::False, document.sorbet_level)
+    assert_equal(RubyLsp::RubyDocument::SorbetLevel::False, document.sorbet_level)
   end
 
   def test_sigil_true
     document = RubyLsp::RubyDocument.new(source: +"# typed: true", version: 1, uri: URI("file:///foo/bar.rb"))
-    assert_equal(RubyLsp::Document::SorbetLevel::True, document.sorbet_level)
+    assert_equal(RubyLsp::RubyDocument::SorbetLevel::True, document.sorbet_level)
   end
 
   def test_sigil_strict
     document = RubyLsp::RubyDocument.new(source: +"# typed: strict", version: 1, uri: URI("file:///foo/bar.rb"))
-    assert_equal(RubyLsp::Document::SorbetLevel::Strict, document.sorbet_level)
+    assert_equal(RubyLsp::RubyDocument::SorbetLevel::Strict, document.sorbet_level)
   end
 
   def test_sigil_strong
     document = RubyLsp::RubyDocument.new(source: +"# typed: strong", version: 1, uri: URI("file:///foo/bar.rb"))
-    assert_equal(RubyLsp::Document::SorbetLevel::Strict, document.sorbet_level)
+    assert_equal(RubyLsp::RubyDocument::SorbetLevel::Strict, document.sorbet_level)
   end
 
   def test_sorbet_sigil_only_in_magic_comment
@@ -651,7 +651,7 @@ class RubyDocumentTest < Minitest::Test
         CODE
       end
     RUBY
-    assert_equal(RubyLsp::Document::SorbetLevel::False, document.sorbet_level)
+    assert_equal(RubyLsp::RubyDocument::SorbetLevel::False, document.sorbet_level)
   end
 
   def test_locating_compact_namespace_declaration
@@ -714,6 +714,29 @@ class RubyDocumentTest < Minitest::Test
     node_context = document.locate_node({ line: 16, character: 6 })
     assert_equal(["Foo"], node_context.nesting)
     assert_equal("qux", node_context.surrounding_method)
+  end
+
+  def test_locate_first_within_range
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+      method_call(other_call).each do |a|
+        nested_call(fourth_call).each do |b|
+        end
+      end
+    RUBY
+
+    target = document.locate_first_within_range(
+      { start: { line: 0, character: 0 }, end: { line: 3, character: 3 } },
+      node_types: [Prism::CallNode],
+    )
+
+    assert_equal("each", T.cast(target, Prism::CallNode).message)
+
+    target = document.locate_first_within_range(
+      { start: { line: 1, character: 2 }, end: { line: 2, character: 5 } },
+      node_types: [Prism::CallNode],
+    )
+
+    assert_equal("each", T.cast(target, Prism::CallNode).message)
   end
 
   private

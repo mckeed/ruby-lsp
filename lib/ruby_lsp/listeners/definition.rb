@@ -20,7 +20,7 @@ module RubyLsp
           uri: URI::Generic,
           node_context: NodeContext,
           dispatcher: Prism::Dispatcher,
-          sorbet_level: Document::SorbetLevel,
+          sorbet_level: RubyDocument::SorbetLevel,
         ).void
       end
       def initialize(response_builder, global_state, language_id, uri, node_context, dispatcher, sorbet_level) # rubocop:disable Metrics/ParameterLists
@@ -46,6 +46,7 @@ module RubyLsp
           :on_instance_variable_or_write_node_enter,
           :on_instance_variable_target_node_enter,
           :on_string_node_enter,
+          :on_symbol_node_enter,
           :on_super_node_enter,
           :on_forwarding_super_node_enter,
         )
@@ -79,6 +80,17 @@ module RubyLsp
         return unless name == :require || name == :require_relative
 
         handle_require_definition(node, name)
+      end
+
+      sig { params(node: Prism::SymbolNode).void }
+      def on_symbol_node_enter(node)
+        enclosing_call = @node_context.call_node
+        return unless enclosing_call
+
+        name = enclosing_call.name
+        return unless name == :autoload
+
+        handle_autoload_definition(enclosing_call)
       end
 
       sig { params(node: Prism::BlockArgumentNode).void }
@@ -169,7 +181,7 @@ module RubyLsp
       def handle_instance_variable_definition(name)
         # Sorbet enforces that all instance variables be declared on typed strict or higher, which means it will be able
         # to provide all features for them
-        return if @sorbet_level == Document::SorbetLevel::Strict
+        return if @sorbet_level == RubyDocument::SorbetLevel::Strict
 
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
@@ -251,6 +263,17 @@ module RubyLsp
         end
       end
 
+      sig { params(node: Prism::CallNode).void }
+      def handle_autoload_definition(node)
+        argument = node.arguments&.arguments&.first
+        return unless argument.is_a?(Prism::SymbolNode)
+
+        constant_name = argument.value
+        return unless constant_name
+
+        find_in_index(constant_name)
+      end
+
       sig { params(value: String).void }
       def find_in_index(value)
         entries = @index.resolve(value, @node_context.nesting)
@@ -266,7 +289,7 @@ module RubyLsp
           # additional behavior on top of jumping to RBIs. The only sigil where Sorbet cannot handle constants is typed
           # ignore
           file_path = entry.file_path
-          next if @sorbet_level != Document::SorbetLevel::Ignore && not_in_dependencies?(file_path)
+          next if @sorbet_level != RubyDocument::SorbetLevel::Ignore && not_in_dependencies?(file_path)
 
           @response_builder << Interface::LocationLink.new(
             target_uri: URI::Generic.from_path(path: file_path).to_s,

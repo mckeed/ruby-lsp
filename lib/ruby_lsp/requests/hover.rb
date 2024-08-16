@@ -22,9 +22,9 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(Interface::HoverClientCapabilities) }
+        sig { returns(Interface::HoverOptions) }
         def provider
-          Interface::HoverClientCapabilities.new(dynamic_registration: false)
+          Interface::HoverOptions.new
         end
       end
 
@@ -32,11 +32,11 @@ module RubyLsp
 
       sig do
         params(
-          document: Document,
+          document: T.any(RubyDocument, ERBDocument),
           global_state: GlobalState,
           position: T::Hash[Symbol, T.untyped],
           dispatcher: Prism::Dispatcher,
-          sorbet_level: Document::SorbetLevel,
+          sorbet_level: RubyDocument::SorbetLevel,
         ).void
       end
       def initialize(document, global_state, position, dispatcher, sorbet_level)

@@ -9,7 +9,7 @@ GIT
 PATH
   remote: .
   specs:
-    ruby-lsp (0.17.11)
+    ruby-lsp (0.17.14)
       language_server-protocol (~> 3.17.0)
       prism (>= 0.29.0, < 0.31)
       rbs (>= 3, < 4)
@@ -61,7 +61,7 @@ GEM
     regexp_parser (2.9.2)
     reline (0.5.0)
       io-console (~> 0.5)
-    rexml (3.3.2)
+    rexml (3.3.4)
       strscan
     rubocop (1.64.1)
       json (~> 2.3)

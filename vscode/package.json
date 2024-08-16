@@ -2,7 +2,7 @@
   "name": "ruby-lsp",
   "displayName": "Ruby LSP",
   "description": "VS Code plugin for connecting with the Ruby LSP",
-  "version": "0.7.14",
+  "version": "0.7.15",
   "publisher": "Shopify",
   "repository": {
     "type": "git",
@@ -11,12 +11,14 @@
   "license": "MIT",
   "icon": "icon.png",
   "engines": {
-    "vscode": "^1.68.0"
+    "vscode": "^1.92.0"
   },
   "categories": [
     "Programming Languages",
     "Snippets",
-    "Testing"
+    "Testing",
+    "AI",
+    "Chat"
   ],
   "activationEvents": [
     "onLanguage:ruby",
@@ -26,6 +28,21 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "chatParticipants": [
+      {
+        "id": "rubyLsp.chatAgent",
+        "fullName": "Ruby",
+        "name": "ruby",
+        "description": "How can I help with your Ruby on Rails application?",
+        "isSticky": true,
+        "commands": [
+          {
+            "name": "design",
+            "description": "Explain what you're trying to build and I will suggest possible ways to model the domain"
+          }
+        ]
+      }
+    ],
     "menus": {
       "editor/context": [
         {
@@ -469,7 +486,22 @@
               }
             }
           },
-          "attach": {}
+          "attach": {
+            "properties": {
+              "debugSocketPath": {
+                "type": "string",
+                "description": "The path to the debug socket. This is used to connect to the debugger"
+              },
+              "debugPort": {
+                "type": "number",
+                "description": "The port to use to connect to the debugger"
+              },
+              "debugHost": {
+                "type": "string",
+                "description": "The host to use to connect to the debugger"
+              }
+            }
+          }
         },
         "configurationSnippets": [
           {
@@ -642,16 +674,18 @@
     "ws": ">= 7.4.6"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.9",
-    "@shopify/eslint-plugin": "^45.0.0",
+    "@babel/core": "^7.25.2",
+    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/js": "^9.9.0",
+    "@shopify/eslint-plugin": "^46.0.0",
     "@shopify/prettier-config": "^1.1.2",
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.7",
     "@types/node": "22.x",
     "@types/sinon": "^17.0.3",
-    "@types/vscode": "^1.68.0",
-    "@typescript-eslint/eslint-plugin": "^7.17.0",
-    "@typescript-eslint/parser": "^7.17.0",
+    "@types/vscode": "^1.92.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
     "@vscode/test-electron": "^2.4.1",
     "@vscode/vsce": "^2.31.1",
     "esbuild": "^0.23.0",
@@ -659,7 +693,7 @@
     "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-prettier": "^5.2.1",
     "glob": "^11.0.0",
-    "mocha": "^10.7.0",
+    "mocha": "^10.7.3",
     "ovsx": "^0.9.2",
     "prettier": "^3.3.3",
     "typescript": "^5.5.4",

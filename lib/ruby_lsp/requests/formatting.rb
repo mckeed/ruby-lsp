@@ -27,7 +27,20 @@ module RubyLsp
 
       class Error < StandardError; end
 
-      sig { params(global_state: GlobalState, document: Document).void }
+      class << self
+        extend T::Sig
+
+        sig { returns(Interface::DocumentFormattingRegistrationOptions) }
+        def provider
+          Interface::DocumentFormattingRegistrationOptions.new(
+            document_selector: [
+              Interface::DocumentFilter.new(language: "ruby"),
+            ],
+          )
+        end
+      end
+
+      sig { params(global_state: GlobalState, document: RubyDocument).void }
       def initialize(global_state, document)
         super()
         @document = document

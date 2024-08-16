@@ -22,16 +22,17 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(T::Hash[Symbol, T::Boolean]) }
+        sig { returns(Interface::DiagnosticRegistrationOptions) }
         def provider
-          {
-            interFileDependencies: false,
-            workspaceDiagnostics: false,
-          }
+          Interface::DiagnosticRegistrationOptions.new(
+            document_selector: [Interface::DocumentFilter.new(language: "ruby")],
+            inter_file_dependencies: false,
+            workspace_diagnostics: false,
+          )
         end
       end
 
-      sig { params(global_state: GlobalState, document: Document).void }
+      sig { params(global_state: GlobalState, document: RubyDocument).void }
       def initialize(global_state, document)
         super()
         @active_linters = T.let(global_state.active_linters, T::Array[Support::Formatter])
