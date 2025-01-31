@@ -86,13 +86,13 @@ function getLspExecutables(
     const argsWithBranch = branch.length > 0 ? ["--branch", branch] : [];
 
     run = {
-      command: "ruby-lsp",
+      command: "/Users/Duncan/Code/Ruby/ruby-lsp/exe/ruby-lsp",
       args: argsWithBranch,
       options: executableOptions,
     };
 
     debug = {
-      command: "ruby-lsp",
+      command: "/Users/Duncan/Code/Ruby/ruby-lsp/exe/ruby-lsp",
       args: argsWithBranch.concat(["--debug"]),
       options: executableOptions,
     };

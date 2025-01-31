@@ -453,6 +453,23 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_custom_bundle_uses_configured_gemfile
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        Dir.mkdir('bundle')
+        FileUtils.touch(File.join(dir, "AltGemfile"))
+        FileUtils.touch(File.join(dir, "AltGemfile.lock"))
+
+        capture_subprocess_io do
+          system("bundle config gemfile AltGemfile")
+        end
+
+
+
+      end
+    end
+  end
+
   def test_custom_bundle_points_to_gemfile_in_enclosing_dir
     Dir.mktmpdir do |dir|
       FileUtils.touch(File.join(dir, "Gemfile"))

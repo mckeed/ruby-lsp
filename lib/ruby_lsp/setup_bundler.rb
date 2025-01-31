@@ -29,6 +29,16 @@ module RubyLsp
       @branch = T.let(options[:branch], T.nilable(String))
       @experimental = T.let(options[:experimental], T.nilable(T::Boolean))
 
+      # Check for gemfile set via bundler config
+      if ENV["BUNDLE_GEMFILE"].nil?
+        custom_gemfile = Bundler.settings[:gemfile]
+        if custom_gemfile && !custom_gemfile.empty?
+          Bundler::SharedHelpers.set_env "BUNDLE_GEMFILE", File.expand_path(custom_gemfile)
+          Bundler.reset_settings_and_root!
+        end
+      end
+      $stderr.puts("Ruby LSP> ENV[\"BUNDLE_GEMFILE\"] = #{ENV["BUNDLE_GEMFILE"].inspect}")
+
       # Regular bundle paths
       @gemfile = T.let(
         begin
@@ -42,7 +52,7 @@ module RubyLsp
 
       @gemfile_name = T.let(@gemfile&.basename&.to_s || "Gemfile", String)
 
-      $stderr.puts("Ruby LSP> Gemfile: #{@gemfile}") if @gemfile && @gemfile != Pathname.pwd.join("Gemfile")
+      $stderr.puts("Ruby LSP> Gemfile: #{@gemfile}") # if @gemfile && @gemfile != Pathname.pwd.join("Gemfile")
 
       # Custom bundle paths
       @custom_dir = T.let(Pathname.new(".ruby-lsp").expand_path(Dir.pwd), Pathname)

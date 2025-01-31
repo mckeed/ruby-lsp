@@ -118,8 +118,12 @@ export class RubyLsp {
         activeDocument.uri,
       );
 
-      if (workspaceFolder && workspaceFolder !== firstWorkspace) {
-        await this.activateWorkspace(workspaceFolder, true);
+      if (workspaceFolder) {
+        if (workspaceFolder !== firstWorkspace) {
+          await this.activateWorkspace(workspaceFolder, true);
+        } else {
+          LOG_CHANNEL.info("Not activating first workspace again");
+        }
       }
     }
 
@@ -155,6 +159,7 @@ export class RubyLsp {
     // When eagerly activating workspaces, we skip the ones that do not have a lockfile since they may not be a Ruby
     // workspace. Those cases are activated lazily below
     if (eager && !lockfileExists) {
+      LOG_CHANNEL.info("Not eagerly activating workspace without lockfile");
       return;
     }
 
@@ -199,6 +204,8 @@ export class RubyLsp {
 
     await workspace.start();
     this.context.subscriptions.push(workspace);
+
+    LOG_CHANNEL.info("Workspace activated");
 
     // If we successfully activated a workspace, then we can start showing the dependencies tree view. This is necessary
     // so that we can avoid showing it on non Ruby projects

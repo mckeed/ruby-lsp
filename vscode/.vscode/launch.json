@@ -10,6 +10,7 @@
 			"type": "extensionHost",
 			"request": "launch",
 			"args": [
+				"/Users/Duncan/.rbenv/versions/3.1.4/lib/ruby/gems/3.1.0/gems/bundler-2.4.13/",
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			],
 			"outFiles": [

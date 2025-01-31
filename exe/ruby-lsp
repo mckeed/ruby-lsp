@@ -60,6 +60,9 @@ end
 # When we're running without bundler, then we need to make sure the custom bundle is fully configured and re-execute
 # using `BUNDLE_GEMFILE=.ruby-lsp/Gemfile bundle exec ruby-lsp` so that we have access to the gems that are a part of
 # the application's bundle
+require "bundler"
+$stderr.puts "ENV[\"BUNDLE_GEMFILE\"] = #{ENV["BUNDLE_GEMFILE"]}"
+$stderr.puts "Bundler.default_gemfile = #{Bundler.default_gemfile}"
 if ENV["BUNDLE_GEMFILE"].nil?
   require_relative "../lib/ruby_lsp/setup_bundler"
 
